@@ -33,7 +33,7 @@ class YOLO(Model):
                 "predictor": yolo.classify.ClassificationPredictor,
             },
             "detect": {
-                "model": DetectionModel,
+                "model": DetectionModel,  # 做物体检测  跳转到ultralytics/nn/tasks.py
                 "trainer": yolo.detect.DetectionTrainer,
                 "validator": yolo.detect.DetectionValidator,
                 "predictor": yolo.detect.DetectionPredictor,

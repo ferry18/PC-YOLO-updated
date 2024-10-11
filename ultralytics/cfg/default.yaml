@@ -1,27 +1,27 @@
 # Ultralytics YOLO 🚀, AGPL-3.0 license
 # Default training settings and hyperparameters for medium-augmentation COCO training
 
-task: detect # (str) YOLO task, i.e. detect, segment, classify, pose
-mode: train # (str) YOLO mode, i.e. train, val, predict, export, track, benchmark
+task: detect # (str) YOLO task, i.e. detect, segment, classify, pose  YOLO模型的任务选择，选择你是要进行检测、分类等操作
+mode: train # (str) YOLO mode, i.e. train, val, predict, export, track, benchmark  YOLO模式的选择，选择要进行训练、推理、输出、验证等操作
 
 # Train settings -------------------------------------------------------------------------------------------------------
-model: # (str, optional) path to model file, i.e. yolov8n.pt, yolov8n.yaml
-data: # (str, optional) path to data file, i.e. coco8.yaml
-epochs: 100 # (int) number of epochs to train for
+model: # (str, optional) path to model file, i.e. yolov8n.pt, yolov8n.yaml  模型的文件，可以是官方的预训练模型，也可以是训练自己模型的yaml文件
+data: # (str, optional) path to data file, i.e. coco8.yaml  模型的地址，可以是文件的地址，也可以是配置好地址的yaml文件
+epochs: 100 # (int) number of epochs to train for 训练的轮次，将你的数据输入到模型里进行训练的次数
 time: # (float, optional) number of hours to train for, overrides epochs if supplied
-patience: 100 # (int) epochs to wait for no observable improvement for early stopping of training
-batch: 16 # (int) number of images per batch (-1 for AutoBatch)
+patience: 100 # (int) epochs to wait for no observable improvement for early stopping of training 早停机制，当你的模型精度没有改进了就提前停止训练
+batch: 16 # (int) number of images per batch (-1 for AutoBatch) 我们输入的数据集会分解为多个子集，一次向模型里输入多少个子集
 imgsz: 640 # (int | list) input images size as int for train and val modes, or list[h,w] for predict and export modes
-save: True # (bool) save train checkpoints and predict results
-save_period: -1 # (int) Save checkpoint every x epochs (disabled if < 1)
-cache: False # (bool) True/ram, disk or False. Use cache for data loading
-device: # (int | str | list, optional) device to run on, i.e. cuda device=0 or device=0,1,2,3 or device=cpu
-workers: 8 # (int) number of worker threads for data loading (per RANK if DDP)
+save: True # (bool) save train checkpoints and predict results  	是否保存模型以及预测结果
+save_period: -1 # (int) Save checkpoint every x epochs (disabled if < 1)  在训练过程中多少次保存一次模型文件,就是生成的pt文件
+cache: False # (bool) True/ram, disk or False. Use cache for data loading 参数cache用于控制是否启用缓存机制。
+device: # (int | str | list, optional) device to run on, i.e. cuda device=0 or device=0,1,2,3 or device=cpu  	GPU设备的选择：cuda device=0 or device=0,1,2,3 or device=cpu
+workers: 8 # (int) number of worker threads for data loading (per RANK if DDP)  工作的线程，Windows系统一定要设置为0否则很可能会引起线程报错
 project: # (str, optional) project name
-name: # (str, optional) experiment name, results saved to 'project/name' directory
-exist_ok: False # (bool) whether to overwrite existing experiment
-pretrained: True # (bool | str) whether to use a pretrained model (bool) or a model to load weights from (str)
-optimizer: auto # (str) optimizer to use, choices=[SGD, Adam, Adamax, AdamW, NAdam, RAdam, RMSProp, auto]
+name: # (str, optional) experiment name, results saved to 'project/name' directory  模型保存的名字，结果会保存到'project/name' 目录下
+exist_ok: False # (bool) whether to overwrite existing experiment  如果模型存在的时候是否进行覆盖操作
+pretrained: True # (bool | str) whether to use a pretrained model (bool) or a model to load weights from (str) 	参数pretrained用于控制是否使用预训练模型。
+optimizer: auto # (str) optimizer to use, choices=[SGD, Adam, Adamax, AdamW, NAdam, RAdam, RMSProp, auto]优化器的选择choices=[SGD, Adam, Adamax, AdamW, NAdam, RAdam, RMSProp, auto]
 verbose: True # (bool) whether to print verbose output
 seed: 0 # (int) random seed for reproducibility
 deterministic: True # (bool) whether to enable deterministic mode

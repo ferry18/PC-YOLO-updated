@@ -255,7 +255,7 @@ def get_cfg(cfg: Union[str, Path, Dict, SimpleNamespace] = DEFAULT_CFG_DICT, ove
         check_dict_alignment(cfg, overrides)
         cfg = {**cfg, **overrides}  # merge cfg and overrides dicts (prefer overrides)
 
-    # Special handling for numeric project/name
+    # Special handling for numeric project/name 对数字 projectname 的特殊处理
     for k in "project", "name":
         if k in cfg and isinstance(cfg[k], (int, float)):
             cfg[k] = str(cfg[k])
@@ -263,10 +263,10 @@ def get_cfg(cfg: Union[str, Path, Dict, SimpleNamespace] = DEFAULT_CFG_DICT, ove
         cfg["name"] = cfg.get("model", "").split(".")[0]
         LOGGER.warning(f"WARNING ⚠️ 'name=model' automatically updated to 'name={cfg['name']}'.")
 
-    # Type and Value checks
+    # Type and Value checks类型和值校验
     check_cfg(cfg)
 
-    # Return instance
+    # Return instance返回实例
     return IterableSimpleNamespace(**cfg)
 
 
