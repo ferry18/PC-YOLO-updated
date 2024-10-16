@@ -107,6 +107,7 @@ class BaseTrainer:
         init_seeds(self.args.seed + 1 + RANK, deterministic=self.args.deterministic)
 
         # Dirs
+        # TODO：设置训练过程中需要用到的文件目录和保存路径
         self.save_dir = get_save_dir(self.args)
         self.args.name = self.save_dir.name  # update name for loggers
         self.wdir = self.save_dir / "weights"  # weights dir
@@ -123,21 +124,22 @@ class BaseTrainer:
         if RANK == -1:
             print_args(vars(self.args))
 
-        # Device
+        # TODO：Device
         if self.device.type in {"cpu", "mps"}:
             self.args.workers = 0  # faster CPU training as time dominated by inference, not dataloading
 
         # Model and Dataset
+        # 确保加载的模型文件名符合规范，如.pt结尾，   checks.py->check_model_file_from_stem
         self.model = check_model_file_from_stem(self.args.model)  # add suffix, i.e. yolov8n -> yolov8n.pt
         with torch_distributed_zero_first(LOCAL_RANK):  # avoid auto-downloading dataset multiple times
-            self.trainset, self.testset = self.get_dataset()
+            self.trainset, self.testset = self.get_dataset()   # 加载数据集
         self.ema = None
 
         # Optimization utils init
         self.lf = None
         self.scheduler = None
 
-        # Epoch level metrics
+        # Epoch level metrics  初始化与模型训练相关的重要指标属性
         self.best_fitness = None
         self.fitness = None
         self.loss = None
@@ -541,6 +543,7 @@ class BaseTrainer:
         # if self.args.close_mosaic and self.epoch == (self.epochs - self.args.close_mosaic - 1):
         #    (self.wdir / "last_mosaic.pt").write_bytes(serialized_ckpt)  # save mosaic checkpoint
 
+    # TODO:获取训练和验证数据集的路径
     def get_dataset(self):
         """
         Get train, val path from data dict if it exists.

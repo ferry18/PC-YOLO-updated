@@ -263,7 +263,7 @@ def get_cfg(cfg: Union[str, Path, Dict, SimpleNamespace] = DEFAULT_CFG_DICT, ove
         cfg["name"] = cfg.get("model", "").split(".")[0]
         LOGGER.warning(f"WARNING ⚠️ 'name=model' automatically updated to 'name={cfg['name']}'.")
 
-    # Type and Value checks类型和值校验
+    # Type and Value checks  类型和值校验
     check_cfg(cfg)
 
     # Return instance返回实例
@@ -298,6 +298,7 @@ def check_cfg(cfg, hard=True):
         - None values are ignored as they may be from optional arguments.
         - Fraction keys are checked to be within the range [0.0, 1.0].
     """
+    # TODO：参数加载
     for k, v in cfg.items():
         if v is not None:  # None values may be from optional args
             if k in CFG_FLOAT_KEYS and not isinstance(v, (int, float)):
@@ -382,6 +383,7 @@ def _handle_deprecation(custom):
         equivalents. It also handles value conversions where necessary, such as inverting boolean values for
         'hide_labels' and 'hide_conf'.
     """
+    # TODO:检查参数，确保命名正确
     for key in custom.copy().keys():
         if key == "boxes":
             deprecation_warn(key, "show_boxes")

@@ -483,7 +483,7 @@ def check_yolov5u_filename(file: str, verbose: bool = True):
                 )
     return file
 
-
+# TODO:确保加载的模型文件名符合规范，如.pt结尾，且模型文件名与模型类型对应，如yolov8n.pt对应yolov8n模型
 def check_model_file_from_stem(model="yolov8n"):
     """Return a model filename from a valid model stem."""
     if model and not Path(model).suffix and Path(model).stem in downloads.GITHUB_ASSETS_STEMS:

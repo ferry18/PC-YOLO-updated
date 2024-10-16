@@ -41,7 +41,7 @@ from .block import (
     C2fCIB,
     C2fPSA,
     C3Ghost,
-    C3k2,
+    C3k2,   # TODO
     C3x,
     CBFuse,
     CBLinear,
@@ -71,6 +71,7 @@ from .conv import (
     LightConv,
     RepConv,
     SpatialAttention,
+    ACConv2d,
 )
 from .head import OBB, Classify, Detect, Pose, RTDETRDecoder, Segment, WorldDetect, v10Detect
 from .transformer import (
@@ -113,7 +114,7 @@ __all__ = (
     "C2",
     "C3",
     "C2f",
-    "C3k2",
+    "C3k2",   # TODO
     "SCDown",
     "C2fPSA",
     "C2PSA",
@@ -156,4 +157,5 @@ __all__ = (
     "C2fCIB",
     "Attention",
     "PSA",
+    "ACConv2d",
 )

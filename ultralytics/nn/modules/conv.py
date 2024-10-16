@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 
 __all__ = (
+    "ACConv2d",    # TODO
     "Conv",
     "Conv2",
     "LightConv",
@@ -22,6 +23,127 @@ __all__ = (
     "Concat",
     "RepConv",
 )
+
+
+# class ACConv2d(nn.Module):
+#     def __init__(self,in_channels,out_channels,kernel_size=3,stride=1,padding=1,bias=False):
+#         super(ACConv2d,self).__init__()
+#         self.bias = bias
+#         self.conv = nn.Conv2d(in_channels,out_channels,kernel_size=kernel_size,
+#                              stride=stride,padding=padding,bias=bias)
+#         self.ac1 = nn.Conv2d(in_channels,out_channels,kernel_size=(1,kernel_size),
+#                             stride=stride,padding=(0,padding),bias=bias)
+#         self.ac2 = nn.Conv2d(in_channels,out_channels,kernel_size=(kernel_size,1),
+#                             stride=stride,padding=(padding,0),bias=bias)
+#         self.fusedconv = nn.Conv2d(in_channels,out_channels,kernel_size=kernel_size,
+#                                  stride=stride,padding=padding,bias=bias)
+#
+#     def forward(self, x):
+#         if self.training:
+#             ac1 = self.ac1(x)
+#             ac2 = self.ac2(x)
+#             x = self.conv(x)
+#             return (ac1+ac2+x)/3
+#         else:
+#             x = self.fusedconv(x)
+#             return x
+
+# class ACConv2d(nn.Module):
+#     def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True):
+#         super(ACConv2d, self).__init__()
+#         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size,
+#                               stride=stride, padding=padding, bias=True)
+#         self.ac1 = nn.Conv2d(in_channels, out_channels, kernel_size=(1, kernel_size),
+#                              stride=stride, padding=(0, padding), bias=True)
+#         self.ac2 = nn.Conv2d(in_channels, out_channels, kernel_size=(kernel_size, 1),
+#                              stride=stride, padding=(padding, 0), bias=True)
+#
+#     def forward(self, x):
+#         ac1 = self.ac1(x)
+#         ac2 = self.ac2(x)
+#         x = self.conv(x)
+#         return (ac1 + ac2 + x) / 3
+
+# class ACConv2d(nn.Module):
+#     def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True):
+#         super().__init__()
+#         self.ac1 = nn.Conv2d(in_channels, out_channels, kernel_size=(1, kernel_size),
+#                              stride=stride, padding=(0, padding), bias=bias)
+#         self.ac2 = nn.Conv2d(in_channels, out_channels, kernel_size=(kernel_size, 1),
+#                              stride=stride, padding=(padding, 0), bias=bias)
+#         self.norm_ac = nn.Sequential(
+#             nn.BatchNorm2d(out_channels),
+#             nn.PReLU()
+#         )
+#
+#     def forward(self, x):
+#         ac1 = self.ac1(x)
+#         ac2 = self.ac2(x)
+#         x = self.norm_ac(ac1 + ac2)
+#         return x
+
+# class ACConv2d(nn.Module):
+#     def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True):
+#         super(ACConv2d, self).__init__()
+#         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size,
+#                               stride=stride, padding=padding, bias=True,groups=math.gcd(in_channels,out_channels))
+#         self.ac1 = nn.Conv2d(in_channels, out_channels, kernel_size=(1, kernel_size),
+#                              stride=stride, padding=(0, padding), bias=True)
+#         self.ac2 = nn.Conv2d(in_channels, out_channels, kernel_size=(kernel_size, 1),
+#                              stride=stride, padding=(padding, 0), bias=True)
+#
+#     def forward(self, x):
+#         ac1 = self.ac1(x)
+#         ac2 = self.ac2(x)
+#         x = self.conv(x)
+#         return (ac1 + ac2 + x) / 3
+
+
+class ACConv2d(nn.Module):
+    """ACConv2d layer with args(ch_in, ch_out, kernel, stride, padding, groups, dilation, activation)."""
+
+    default_act = nn.SiLU()  # default activation, can be modified if needed
+
+    def __init__(self, c1, c2, k=3, s=1, p=None, g=1, d=1, act=True):
+        """Initialize ACConv2d layer with asymmetric convolutions and batch normalization."""
+        super().__init__()
+
+        # 自动填充 (padding)
+        if p is None:
+            p = k // 2  # 默认使用卷积核大小的一半作为填充
+
+        # 标准卷积，分组卷积与 `groups=math.gcd(c1, c2)`
+        self.conv = nn.Conv2d(c1, c2, k, s, p, groups=math.gcd(c1, c2), dilation=d, bias=False)
+
+        # 不对称卷积核，1x3 和 3x1
+        self.ac1 = nn.Conv2d(c1, c2, kernel_size=(1, k), stride=s, padding=(0, p), bias=False)
+        self.ac2 = nn.Conv2d(c1, c2, kernel_size=(k, 1), stride=s, padding=(p, 0), bias=False)
+
+        # 批量归一化
+        self.bn = nn.BatchNorm2d(c2)
+
+        # 激活函数
+        self.act = self.default_act if act is True else act if isinstance(act, nn.Module) else nn.Identity()
+
+    def forward(self, x):
+        """Forward pass: apply asymmetric convolutions, combine, then apply batch norm and activation."""
+        # 分别应用卷积
+        ac1 = self.ac1(x)
+        ac2 = self.ac2(x)
+        conv = self.conv(x)
+
+        # 三个结果相加后再归一化和激活
+        out = (ac1 + ac2 + conv) / 3  # 取平均值
+        return self.act(self.bn(out))
+
+    def forward_fuse(self, x):
+        """Forward pass without batch normalization, useful for inference."""
+        ac1 = self.ac1(x)
+        ac2 = self.ac2(x)
+        conv = self.conv(x)
+
+        out = (ac1 + ac2 + conv) / 3
+        return self.act(out)
 
 
 def autopad(k, p=None, d=1):  # kernel, padding, dilation

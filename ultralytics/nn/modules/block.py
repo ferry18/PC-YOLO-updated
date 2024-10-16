@@ -40,7 +40,7 @@ __all__ = (
     "SPPELAN",
     "CBFuse",
     "CBLinear",
-    "C3k2",
+    "C3k2",   # TODO
     "C2fPSA",
     "C2PSA",
     "RepVGGDW",
@@ -719,7 +719,7 @@ class C3f(nn.Module):
         y.extend(m(y[-1]) for m in self.m)
         return self.cv3(torch.cat(y, 1))
 
-
+# TODO
 class C3k2(C2f):
     """Faster Implementation of CSP Bottleneck with 2 convolutions."""
 
@@ -740,6 +740,8 @@ class C3k(C3):
         c_ = int(c2 * e)  # hidden channels
         # self.m = nn.Sequential(*(RepBottleneck(c_, c_, shortcut, g, k=(k, k), e=1.0) for _ in range(n)))
         self.m = nn.Sequential(*(Bottleneck(c_, c_, shortcut, g, k=(k, k), e=1.0) for _ in range(n)))
+
+# TODO
 
 
 class RepVGGDW(torch.nn.Module):
