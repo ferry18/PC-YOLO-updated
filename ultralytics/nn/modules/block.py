@@ -49,7 +49,53 @@ __all__ = (
     "Attention",
     "PSA",
     "SCDown",
+    "CALayer",
+    "PALayer",
+    "PFEB",
 )
+
+class CALayer(nn.Module):
+    def __init__(self, input_channel, output_channel):
+        super(CALayer, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.ca = nn.Sequential(
+            nn.Conv2d(input_channel, output_channel // 8, 1, padding=0, bias=True),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(output_channel // 8, output_channel, 1, padding=0, bias=True),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        y = self.avg_pool(x)
+        y = self.ca(y)
+        return x * y
+
+class PALayer(nn.Module):
+    def __init__(self, input_channel, output_channel):
+        super(PALayer, self).__init__()
+        self.pa = nn.Sequential(
+            nn.Conv2d(input_channel, output_channel // 8, 1, padding=0, bias=True),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(output_channel // 8, 1, 1, padding=0, bias=True),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        y = self.pa(x)
+        return x * y
+
+
+class PFEB(nn.Module):
+    def __init__(self, input_channel, output_channel):
+        super(PFEB, self).__init__()
+        self.ca = CALayer(input_channel, output_channel)
+        self.pa = PALayer(input_channel, output_channel)
+
+    def forward(self, x):
+        x = self.ca(x)
+        x = self.pa(x)
+        return x
+
 
 
 class DFL(nn.Module):

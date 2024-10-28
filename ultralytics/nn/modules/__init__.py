@@ -56,6 +56,9 @@ from .block import (
     RepVGGDW,
     ResNetLayer,
     SCDown,
+    CALayer,
+    PALayer,
+    PFEB,
 )
 from .conv import (
     CBAM,
@@ -158,4 +161,7 @@ __all__ = (
     "Attention",
     "PSA",
     "ACConv2d",
+    "CALayer",
+    "PALayer",
+    "PFEB",
 )
