@@ -59,6 +59,8 @@ from .block import (
     CALayer,
     PALayer,
     PFEB,
+    EdgeNet,
+    C2f_WDBB,
 )
 from .conv import (
     CBAM,
@@ -164,4 +166,6 @@ __all__ = (
     "CALayer",
     "PALayer",
     "PFEB",
+    "EdgeNet",
+    "C2f_WDBB"
 )

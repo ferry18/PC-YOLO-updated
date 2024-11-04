@@ -7,6 +7,7 @@ import torch.nn.functional as F
 
 from ultralytics.utils.torch_utils import fuse_conv_and_bn
 
+from .rep_block import *
 from .conv import Conv, DWConv, GhostConv, LightConv, RepConv, autopad
 from .transformer import TransformerBlock
 
@@ -52,7 +53,176 @@ __all__ = (
     "CALayer",
     "PALayer",
     "PFEB",
+    "EdgeNet",
 )
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+class C2f(nn.Module):
+    """CSP Bottleneck with 2 convolutions."""
+
+    def __init__(self, c1, c2, n=1, shortcut=False, g=1, e=0.5):  # ch_in, ch_out, number, shortcut, groups, expansion
+        super().__init__()
+        self.c = int(c2 * e)  # hidden channels
+        self.cv1 = Conv(c1, 2 * self.c, 1, 1)
+        self.cv2 = Conv((2 + n) * self.c, c2, 1)  # optional act=FReLU(c2)
+        self.m = nn.ModuleList(Bottleneck(self.c, self.c, shortcut, g, k=((3, 3), (3, 3)), e=1.0) for _ in range(n))
+
+    def forward(self, x):
+        """Forward pass through C2f layer."""
+        y = list(self.cv1(x).chunk(2, 1))
+        y.extend(m(y[-1]) for m in self.m)
+        return self.cv2(torch.cat(y, 1))
+
+    def forward_split(self, x):
+        """Forward pass using split() instead of chunk()."""
+        y = list(self.cv1(x).split((self.c, self.c), 1))
+        y.extend(m(y[-1]) for m in self.m)
+        return self.cv2(torch.cat(y, 1))
+
+
+class Bottleneck(nn.Module):
+    """Standard bottleneck."""
+
+    def __init__(self, c1, c2, shortcut=True, g=1, k=(3, 3), e=0.5):  # ch_in, ch_out, shortcut, groups, kernels, expand
+        super().__init__()
+        c_ = int(c2 * e)  # hidden channels
+        self.cv1 = Conv(c1, c_, k[0], 1)
+        self.cv2 = Conv(c_, c2, k[1], 1, g=g)
+        self.add = shortcut and c1 == c2
+
+    def forward(self, x):
+        """'forward()' applies the YOLOv5 FPN to input data."""
+        return x + self.cv2(self.cv1(x)) if self.add else self.cv2(self.cv1(x))
+
+class Bottleneck_WDBB(Bottleneck):
+    def __init__(self, c1, c2, shortcut=True, g=1, k=(3, 3), e=0.5):
+        super().__init__(c1, c2, shortcut, g, k, e)
+        c_ = int(c2 * e)  # hidden channels
+        self.cv1 = WideDiverseBranchBlock(c1, c_, k[0], 1)
+        self.cv2 = WideDiverseBranchBlock(c_, c2, k[1], 1, groups=g)
+
+class C2f_WDBB(C2f):
+    def __init__(self, c1, c2, n=1, shortcut=False, g=1, e=0.5):
+        super().__init__(c1, c2, n, shortcut, g, e)
+        self.m = nn.ModuleList(Bottleneck_WDBB(self.c, self.c, shortcut, g, k=(3, 3), e=1.0) for _ in range(n))
+
+
+# -------------------------------------------------------------------------------
+
+class EdgeNet(nn.Module):
+    def __init__(self, c1, c2, ks=3):  # c1是输入通道数，c2是输出通道数
+        super(EdgeNet, self).__init__()
+        self.conv0 = nn.Conv2d(c1, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2)
+        self.conv1 = nn.Conv2d(c1 // 2, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2)
+
+        self.down1 = nn.Conv2d(c1 // 2, c2, kernel_size=ks, stride=2, padding=ks // 2)
+        self.down2 = nn.Conv2d(c2, c2, kernel_size=ks, stride=2, padding=ks // 2)
+
+        self.up1 = nn.ConvTranspose2d(c2, c2, kernel_size=ks, stride=2, padding=ks // 2, output_padding=1)  # 保持通道数不变
+        self.up2 = nn.ConvTranspose2d(c1 // 2, c1 // 2, kernel_size=ks, stride=2, padding=ks // 2,
+                                      output_padding=1)  # 修改这里
+
+        self.aggD2 = nn.Conv2d(c2 * 2, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2)
+        self.aggD1 = nn.Conv2d(c1 // 2 * 2, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2)  # 修改这里
+
+        self.conv2 = nn.Conv2d(c2, c2, kernel_size=ks, stride=1, padding=ks // 2)
+
+        self.img_prd = nn.Sequential(
+            nn.Conv2d(c1 // 2, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2),
+            nn.BatchNorm2d(c1 // 2),
+            nn.LeakyReLU(0.1, inplace=True),
+            nn.Conv2d(c1 // 2, 3, kernel_size=ks, stride=1, padding=ks // 2)
+        )
+
+    def forward(self, x):
+        E1 = self.conv0(x)
+        E2 = self.down1(E1)
+        E3 = self.down2(E2)
+
+        D3 = self.conv2(E3)
+        D3 = self.up1(D3)  # 上采样后直接与E2拼接
+        D2 = self.aggD2(torch.cat([D3, E2], 1))  # 确保E2的尺寸与D3匹配
+        D1 = self.aggD1(torch.cat([self.up2(D2), E1], 1))
+
+        img_prd = self.img_prd(D1)
+        return D1, img_prd
+
+
+# class EdgeNet(nn.Module):
+#     def __init__(self, c1, c2, ks=3):  # c1是输入通道数，c2是输出通道数
+#         super(EdgeNet, self).__init__()
+#         self.conv0 = nn.Conv2d(c1, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2)
+#         self.conv1_2 = nn.Sequential(
+#             nn.Conv2d(c1 // 2, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2),
+#             nn.BatchNorm2d(c1 // 2),
+#             nn.LeakyReLU(0.1, inplace=True)
+#         )
+#         self.conv2_2 = nn.Sequential(
+#             nn.Conv2d(c1 // 2 * 2, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2),
+#             nn.BatchNorm2d(c1 // 2),
+#             nn.LeakyReLU(0.1, inplace=True)
+#         )
+#         self.conv3_2 = nn.Sequential(
+#             nn.Conv2d(c1 // 2 * 4, c2, kernel_size=ks, stride=1, padding=ks // 2),
+#             nn.BatchNorm2d(c2),
+#             nn.LeakyReLU(0.1, inplace=True)
+#         )
+#         self.down1_1 = nn.Sequential(
+#             nn.Conv2d(c1 // 2, c1, kernel_size=ks, stride=2, padding=ks // 2),
+#             nn.BatchNorm2d(c1),
+#             nn.LeakyReLU(0.1, inplace=True)
+#         )
+#         self.down2_1 = nn.Sequential(
+#             nn.Conv2d(c1, c2, kernel_size=ks, stride=2, padding=ks // 2),
+#             nn.BatchNorm2d(c2),
+#             nn.LeakyReLU(0.1, inplace=True)
+#         )
+#         self.up1_1 = nn.ConvTranspose2d(c2, c1, kernel_size=ks, stride=2, padding=ks // 2)
+#         self.up2_1 = nn.ConvTranspose2d(c1, c1 // 2, kernel_size=ks, stride=2, padding=ks // 2)
+#         self.aggD2_1 = nn.Sequential(
+#             nn.Conv2d(c2, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2),
+#             nn.BatchNorm2d(c1 // 2),
+#             nn.LeakyReLU(0.1, inplace=True)
+#         )
+#         self.aggD1_1 = nn.Sequential(
+#             nn.Conv2d(c1, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2),
+#             nn.BatchNorm2d(c1 // 2),
+#             nn.LeakyReLU(0.1, inplace=True)
+#         )
+#         self.img_prd = nn.Sequential(
+#             nn.Conv2d(c1 // 2, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2),
+#             nn.BatchNorm2d(c1 // 2),
+#             nn.LeakyReLU(0.1, inplace=True),
+#             nn.Conv2d(c1 // 2, 3, kernel_size=ks, stride=1, padding=ks // 2)
+#         )
+#         self.img_prd1 = nn.Sequential(
+#             nn.Conv2d(c1, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2),
+#             nn.BatchNorm2d(c1 // 2),
+#             nn.LeakyReLU(0.1, inplace=True),
+#             nn.Conv2d(c1 // 2, 3, kernel_size=ks, stride=1, padding=ks // 2)
+#         )
+#         self.img_prd2 = nn.Sequential(
+#             nn.Conv2d(c2, c1 // 2, kernel_size=ks, stride=1, padding=ks // 2),
+#             nn.BatchNorm2d(c1 // 2),
+#             nn.LeakyReLU(0.1, inplace=True),
+#             nn.Conv2d(c1 // 2, 3, kernel_size=ks, stride=1, padding=ks // 2)
+#         )
+#
+#     def forward(self, x):
+#         E1_1 = self.conv0(x)
+#         E2_1 = self.down1_1(E1_1)
+#         E3_1 = self.down2_1(E2_1)
+#         D3_1 = self.conv3_2(E3_1)
+#         D2_1 = self.aggD2_1(torch.cat([self.up2_1(D3_1), self.conv2_2(E2_1)], 1))
+#         D1_1 = self.aggD1_1(torch.cat([self.up1_1(D2_1), self.conv1_2(E1_1)], 1))
+#         img_prd = self.img_prd(D1_1)
+#         img_prd1 = self.img_prd1(D2_1)
+#         img_prd2 = self.img_prd2(D3_1)
+#         return D1_1, img_prd, img_prd1, img_prd2
+
 
 class CALayer(nn.Module):
     def __init__(self, input_channel, output_channel):
@@ -95,6 +265,7 @@ class PFEB(nn.Module):
         x = self.ca(x)
         x = self.pa(x)
         return x
+
 
 
 
