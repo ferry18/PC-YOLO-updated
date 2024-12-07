@@ -106,7 +106,7 @@ def spaces_in_path(path):
 
 def increment_path(path, exist_ok=False, sep="", mkdir=False):
     """
-    Increments a file or directory path, i.e., runs/exp --> runs/exp{sep}2, runs/exp{sep}3, ... etc.
+    Increments a file or directory path, i.e., runs/exp_rain_WP --> runs/exp_rain_WP{sep}2, runs/exp_rain_WP{sep}3, ... etc.
 
     If the path exists and `exist_ok` is not True, the path will be incremented by appending a number and `sep` to
     the end of the path. If the path is a file, the file extension will be preserved. If the path is a directory, the
@@ -125,16 +125,16 @@ def increment_path(path, exist_ok=False, sep="", mkdir=False):
     Examples:
         Increment a directory path:
         >>> from pathlib import Path
-        >>> path = Path("runs/exp")
+        >>> path = Path("runs/exp_rain_WP")
         >>> new_path = increment_path(path)
         >>> print(new_path)
         runs/exp2
 
         Increment a file path:
-        >>> path = Path("runs/exp/results.txt")
+        >>> path = Path("runs/exp_rain_WP/results.txt")
         >>> new_path = increment_path(path)
         >>> print(new_path)
-        runs/exp/results2.txt
+        runs/exp_rain_WP/results2.txt
     """
     path = Path(path)  # os-agnostic
     if path.exists() and not exist_ok:

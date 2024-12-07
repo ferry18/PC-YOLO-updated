@@ -110,6 +110,8 @@ class C2f_WDBB(C2f):
         self.m = nn.ModuleList(Bottleneck_WDBB(self.c, self.c, shortcut, g, k=(3, 3), e=1.0) for _ in range(n))
 
 
+
+
 # -------------------------------------------------------------------------------
 
 class EdgeNet(nn.Module):
@@ -222,6 +224,44 @@ class EdgeNet(nn.Module):
 #         img_prd1 = self.img_prd1(D2_1)
 #         img_prd2 = self.img_prd2(D3_1)
 #         return D1_1, img_prd, img_prd1, img_prd2
+
+def default_conv(in_channels, out_channels, kernel_size, bias=True):
+    return nn.Conv2d(in_channels, out_channels, kernel_size, padding=(kernel_size // 2), bias=bias)
+
+class PDB(nn.Module):
+    def __init__(self, channel):
+        super(PDB, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+
+        # 通道注意力
+        self.ka = nn.Sequential(
+            nn.Conv2d(channel, channel // 8, 1, padding=0, bias=True),
+            nn.GELU(),
+            nn.Conv2d(channel // 8, channel, 1, padding=0, bias=True),
+            nn.Sigmoid()
+        )
+
+        # 空间注意力
+        self.td = nn.Sequential(
+            default_conv(channel, channel, 1),
+            default_conv(channel, channel // 8, 3),
+            nn.GELU(),
+            default_conv(channel // 8, channel, 3),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        # 通道注意力：首先通过平均池化
+        a = self.avg_pool(x)
+        a = self.ka(a)
+
+        # 空间注意力：通过卷积操作
+        t = self.td(x)
+
+        # 加权特征图
+        j = torch.mul((1 - t), a) + torch.mul(t, x)
+
+        return j
 
 
 class CALayer(nn.Module):

@@ -6,7 +6,7 @@ import os
 from ultralytics.nn.modules import ACConv2d  # 你的自定义模块应该包含 ACConv2d 的定义
 
 # 定义路径
-model_path = 'D:/way/yolo/yolo11_2/ultralytics/runs/train/exp15/weights/best.pt'
+model_path = 'D:/way/yolo/yolo11_2/ultralytics/runs/train/exp_datasets7_ACConv2d/weights/best.pt'
 data_path = 'D:/way/yolo/Datasets/datasets/cityscapes.yaml'
 
 # 验证函数

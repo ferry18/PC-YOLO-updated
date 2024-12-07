@@ -6,15 +6,15 @@ from ultralytics import YOLO
 if __name__ == '__main__':
     # 记录训练开始时间
     start_time = time.time()
-# python 'D:/way/yolo/yolo5-6/yolov5-6.0/train.py' --weights '' --data 'D:/way/yolo/Datasets/datasets/rain.yaml' --cfg D:/way/yolo/yolo5-6/yolov5-6.0/models/yolov5s.yaml
-    model = YOLO(r'ultralytics/cfg/models/11/yolo11.yaml')
+    model = YOLO(r'ultralytics/cfg/models/11/WDBB_PFEB_ACConv2d.yaml')
     # model = YOLO('yolo11n.pt')
     # model.train(data=r'/mnt/result2/datasets/cityscapes.yaml',
     # model.train(data=r'D:\way\yolo\Datasets\Normal_to_Foggy\voc.yaml',
     # model.train(data=r'D:\\way\\yolo\\Datasets\\cityscapes-2\\city.yaml',
     # model.train(data=r'/mnt/datasets/cityscapes.yaml',
-    # model.train(data=r'/mnt/datasets/rain.yaml',
-    model.train(data=r'/mnt/datasets/rain.yaml',
+    # model.train(data=r'D:/way/yolo/Datasets/datasets_2/cityscapes.yaml',
+    model.train(data=r'/mnt/RTTS/dataset.yaml',
+    # model.train(data=r'D:/way/yolo/Datasets/RTTS2/dataset.yaml',
     cache=False,
     imgsz=640,
     epochs=100,
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     optimizer='SGD',
     amp=True,
     project='runs/train',
-    name='exp_hazy_yolov11',
+    name='exp_RTTS_WDBB_PFEB_ACConv2d',
     half=True)
 
 

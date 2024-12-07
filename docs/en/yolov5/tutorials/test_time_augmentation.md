@@ -29,7 +29,7 @@ python val.py --weights yolov5x.pt --data coco.yaml --img 640 --half
 Output:
 
 ```shell
-val: data=./data/coco.yaml, weights=['yolov5x.pt'], batch_size=32, imgsz=640, conf_thres=0.001, iou_thres=0.65, task=val, device=, single_cls=False, augment=False, verbose=False, save_txt=False, save_hybrid=False, save_conf=False, save_json=True, project=runs/val, name=exp, exist_ok=False, half=True
+val: data=./data/coco.yaml, weights=['yolov5x.pt'], batch_size=32, imgsz=640, conf_thres=0.001, iou_thres=0.65, task=val, device=, single_cls=False, augment=False, verbose=False, save_txt=False, save_hybrid=False, save_conf=False, save_json=True, project=runs/val, name=exp_rain_WP, exist_ok=False, half=True
 YOLOv5 🚀 v5.0-267-g6a3ee7c torch 1.9.0+cu102 CUDA:0 (Tesla P100-PCIE-16GB, 16280.875MB)
 
 Fusing layers...
@@ -41,7 +41,7 @@ val: New cache created: ../datasets/coco/val2017.cache
                  all       5000      36335      0.746      0.626       0.68       0.49
 Speed: 0.1ms pre-process, 22.4ms inference, 1.4ms NMS per image at shape (32, 3, 640, 640)  # <--- baseline speed
 
-Evaluating pycocotools mAP... saving runs/val/exp/yolov5x_predictions.json...
+Evaluating pycocotools mAP... saving runs/val/exp_rain_WP/yolov5x_predictions.json...
 ...
  Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.504  # <--- baseline mAP
  Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.688
@@ -68,7 +68,7 @@ python val.py --weights yolov5x.pt --data coco.yaml --img 832 --augment --half
 Output:
 
 ```shell
-val: data=./data/coco.yaml, weights=['yolov5x.pt'], batch_size=32, imgsz=832, conf_thres=0.001, iou_thres=0.6, task=val, device=, single_cls=False, augment=True, verbose=False, save_txt=False, save_hybrid=False, save_conf=False, save_json=True, project=runs/val, name=exp, exist_ok=False, half=True
+val: data=./data/coco.yaml, weights=['yolov5x.pt'], batch_size=32, imgsz=832, conf_thres=0.001, iou_thres=0.6, task=val, device=, single_cls=False, augment=True, verbose=False, save_txt=False, save_hybrid=False, save_conf=False, save_json=True, project=runs/val, name=exp_rain_WP, exist_ok=False, half=True
 YOLOv5 🚀 v5.0-267-g6a3ee7c torch 1.9.0+cu102 CUDA:0 (Tesla P100-PCIE-16GB, 16280.875MB)
 
 Fusing layers...
@@ -117,7 +117,7 @@ Fusing layers...
 Model Summary: 224 layers, 7266973 parameters, 0 gradients
 image 1/2 /content/yolov5/data/images/bus.jpg: 832x640 4 persons, 1 bus, 1 fire hydrant, Done. (0.029s)
 image 2/2 /content/yolov5/data/images/zidane.jpg: 480x832 3 persons, 3 ties, Done. (0.024s)
-Results saved to runs/detect/exp
+Results saved to runs/detect/exp_rain_WP
 Done. (0.156s)
 ```
 

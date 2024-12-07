@@ -1323,7 +1323,7 @@ def output_to_rotated_target(output, max_det=300):
     return targets[:, 0], targets[:, 1], targets[:, 2:-1], targets[:, -1]
 
 
-def feature_visualization(x, module_type, stage, n=32, save_dir=Path("runs/detect/exp")):
+def feature_visualization(x, module_type, stage, n=32, save_dir=Path("runs/detect/exp_rain_WP")):
     """
     Visualize feature maps of a given model module during inference.
 
@@ -1332,7 +1332,7 @@ def feature_visualization(x, module_type, stage, n=32, save_dir=Path("runs/detec
         module_type (str): Module type.
         stage (int): Module stage within the model.
         n (int, optional): Maximum number of feature maps to plot. Defaults to 32.
-        save_dir (Path, optional): Directory to save results. Defaults to Path('runs/detect/exp').
+        save_dir (Path, optional): Directory to save results. Defaults to Path('runs/detect/exp_rain_WP').
     """
     for m in {"Detect", "Segment", "Pose", "Classify", "OBB", "RTDETRDecoder"}:  # all model heads
         if m in module_type:

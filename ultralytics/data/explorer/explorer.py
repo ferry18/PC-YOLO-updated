@@ -92,8 +92,8 @@ class Explorer:
 
         Example:
             ```python
-            exp = Explorer()
-            exp.create_embeddings_table()
+            exp_rain_WP = Explorer()
+            exp_rain_WP.create_embeddings_table()
             ```
         """
         if self.table is not None and not force:
@@ -161,9 +161,9 @@ class Explorer:
 
         Example:
             ```python
-            exp = Explorer()
-            exp.create_embeddings_table()
-            similar = exp.query(img="https://ultralytics.com/images/zidane.jpg")
+            exp_rain_WP = Explorer()
+            exp_rain_WP.create_embeddings_table()
+            similar = exp_rain_WP.query(img="https://ultralytics.com/images/zidane.jpg")
             ```
         """
         if self.table is None:
@@ -191,10 +191,10 @@ class Explorer:
 
         Example:
             ```python
-            exp = Explorer()
-            exp.create_embeddings_table()
+            exp_rain_WP = Explorer()
+            exp_rain_WP.create_embeddings_table()
             query = "SELECT * FROM 'table' WHERE labels LIKE '%person%'"
-            result = exp.sql_query(query)
+            result = exp_rain_WP.sql_query(query)
             ```
         """
         assert return_type in {
@@ -236,10 +236,10 @@ class Explorer:
 
         Example:
             ```python
-            exp = Explorer()
-            exp.create_embeddings_table()
+            exp_rain_WP = Explorer()
+            exp_rain_WP.create_embeddings_table()
             query = "SELECT * FROM 'table' WHERE labels LIKE '%person%'"
-            result = exp.plot_sql_query(query)
+            result = exp_rain_WP.plot_sql_query(query)
             ```
         """
         result = self.sql_query(query, return_type="arrow")
@@ -270,9 +270,9 @@ class Explorer:
 
         Example:
             ```python
-            exp = Explorer()
-            exp.create_embeddings_table()
-            similar = exp.get_similar(img="https://ultralytics.com/images/zidane.jpg")
+            exp_rain_WP = Explorer()
+            exp_rain_WP.create_embeddings_table()
+            similar = exp_rain_WP.get_similar(img="https://ultralytics.com/images/zidane.jpg")
             ```
         """
         assert return_type in {"pandas", "arrow"}, f"Return type should be `pandas` or `arrow`, but got {return_type}"
@@ -305,9 +305,9 @@ class Explorer:
 
         Example:
             ```python
-            exp = Explorer()
-            exp.create_embeddings_table()
-            similar = exp.plot_similar(img="https://ultralytics.com/images/zidane.jpg")
+            exp_rain_WP = Explorer()
+            exp_rain_WP.create_embeddings_table()
+            similar = exp_rain_WP.plot_similar(img="https://ultralytics.com/images/zidane.jpg")
             ```
         """
         similar = self.get_similar(img, idx, limit, return_type="arrow")
@@ -334,9 +334,9 @@ class Explorer:
 
         Example:
             ```python
-            exp = Explorer()
-            exp.create_embeddings_table()
-            sim_idx = exp.similarity_index()
+            exp_rain_WP = Explorer()
+            exp_rain_WP.create_embeddings_table()
+            sim_idx = exp_rain_WP.similarity_index()
             ```
         """
         if self.table is None:
@@ -392,10 +392,10 @@ class Explorer:
 
         Example:
             ```python
-            exp = Explorer()
-            exp.create_embeddings_table()
+            exp_rain_WP = Explorer()
+            exp_rain_WP.create_embeddings_table()
 
-            similarity_idx_plot = exp.plot_similarity_index()
+            similarity_idx_plot = exp_rain_WP.plot_similarity_index()
             similarity_idx_plot.show()  # view image preview
             similarity_idx_plot.save("path/to/save/similarity_index_plot.png")  # save contents to file
             ```
@@ -446,9 +446,9 @@ class Explorer:
 
         Example:
             ```python
-            exp = Explorer()
-            exp.create_embeddings_table()
-            answer = exp.ask_ai("Show images with 1 person and 2 dogs")
+            exp_rain_WP = Explorer()
+            exp_rain_WP.create_embeddings_table()
+            answer = exp_rain_WP.ask_ai("Show images with 1 person and 2 dogs")
             ```
         """
         result = prompt_sql_query(query)

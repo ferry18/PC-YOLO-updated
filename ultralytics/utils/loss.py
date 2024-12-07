@@ -48,7 +48,7 @@ class FocalLoss(nn.Module):
     def forward(pred, label, gamma=1.5, alpha=0.25):
         """Calculates and updates confusion matrix for object detection/classification tasks."""
         loss = F.binary_cross_entropy_with_logits(pred, label, reduction="none")
-        # p_t = torch.exp(-loss)
+        # p_t = torch.exp_rain_WP(-loss)
         # loss *= self.alpha * (1.000001 - p_t) ** self.gamma  # non-zero power for gradient stability
 
         # TF implementation https://github.com/tensorflow/addons/blob/v0.7.1/tensorflow_addons/losses/focal_loss.py

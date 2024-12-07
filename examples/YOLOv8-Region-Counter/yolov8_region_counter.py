@@ -140,7 +140,7 @@ def run(
     fps, fourcc = int(videocapture.get(5)), cv2.VideoWriter_fourcc(*"mp4v")
 
     # Output setup
-    save_dir = increment_path(Path("ultralytics_rc_output") / "exp", exist_ok)
+    save_dir = increment_path(Path("ultralytics_rc_output") / "exp_rain_WP", exist_ok)
     save_dir.mkdir(parents=True, exist_ok=True)
     video_writer = cv2.VideoWriter(str(save_dir / f"{Path(source).stem}.mp4"), fourcc, fps, (frame_width, frame_height))
 
