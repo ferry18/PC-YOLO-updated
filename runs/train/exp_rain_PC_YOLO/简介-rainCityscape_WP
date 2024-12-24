@@ -1,0 +1,21 @@
+cityscape--》rain数据集
+100轮次
+gpu
+
+100 epochs completed in 18.226 hours.
+Optimizer stripped from runs/train/exp_rain_WDBB_PFEB3/weights/last.pt, 13.0MB
+Optimizer stripped from runs/train/exp_rain_WDBB_PFEB3/weights/best.pt, 13.0MB
+
+Validating runs/train/exp_rain_WDBB_PFEB3/weights/best.pt...
+Ultralytics 8.3.3 🚀 Python-3.8.12 torch-1.11.0+cu113 CUDA:0 (NVIDIA A16, 14906MiB)
+WDBB_PFEB summary: 738 layers, 5,677,924 parameters, 0 gradients, 24.2 GFLOPs
+                 Class     Images  Instances      Box(P          R      mAP50  m
+                   all        499      10967       0.48      0.346      0.348      0.192
+                   car        478       4608      0.603      0.571      0.561       0.36
+              building        488       1151      0.451      0.497      0.416      0.247
+               bicycle        329       1166      0.444      0.244      0.252      0.112
+                person        402       3400      0.449      0.393      0.369      0.186
+                 rider        253        550      0.479      0.329      0.336      0.182
+                   bus         75         92      0.451     0.0435      0.154     0.0655
+Speed: 0.2ms preprocess, 9.6ms inference, 0.0ms loss, 0.8ms postprocess per image
+Results saved to runs/train/exp_rain_WDBB_PFEB3

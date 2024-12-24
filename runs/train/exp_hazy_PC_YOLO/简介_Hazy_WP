@@ -1,0 +1,21 @@
+100
+Hazy
+WP
+
+100 epochs completed in 16.214 hours.
+Optimizer stripped from runs/train/exp_hazy_WDBB_PFEB2/weights/last.pt, 13.0MB
+Optimizer stripped from runs/train/exp_hazy_WDBB_PFEB2/weights/best.pt, 13.0MB
+
+Validating runs/train/exp_hazy_WDBB_PFEB2/weights/best.pt...
+Ultralytics 8.3.3 🚀 Python-3.8.12 torch-1.11.0+cu113 CUDA:0 (NVIDIA A16, 14906MiB)
+WDBB_PFEB summary: 738 layers, 5,677,924 parameters, 0 gradients, 24.2 GFLOPs
+                 Class     Images  Instances      Box(P          R      mAP50  m
+                   all        499      10967      0.526      0.324      0.355      0.202
+                   car        478       4608      0.653      0.554      0.561      0.369
+              building        488       1151      0.524      0.454       0.42      0.258
+               bicycle        329       1166      0.526      0.254      0.272      0.127
+                person        402       3400      0.539      0.355      0.368      0.188
+                 rider        253        550      0.593      0.322       0.36      0.201
+                   bus         75         92      0.321    0.00699      0.147     0.0666
+Speed: 0.2ms preprocess, 9.2ms inference, 0.0ms loss, 0.6ms postprocess per image
+Results saved to runs/train/exp_hazy_WDBB_PFEB2

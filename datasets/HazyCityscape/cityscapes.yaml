@@ -1,0 +1,12 @@
+train: ./images/train
+val: ./images/val
+
+nc: 6  # 修改为保留的类别数量
+names: [
+    'car', 
+    'building', 
+    'bicycle', 
+    'person', 
+    'rider', 
+    'bus'
+]
