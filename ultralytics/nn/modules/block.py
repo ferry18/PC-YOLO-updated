@@ -300,10 +300,18 @@ class PFEB(nn.Module):
         super(PFEB, self).__init__()
         self.ca = CALayer(input_channel, output_channel)
         self.pa = PALayer(input_channel, output_channel)
+        self.pdb = PDB(input_channel)  # 将PDB模块加入PFEB
 
     def forward(self, x):
+        # 先通过通道注意力层
         x = self.ca(x)
+
+        # 再通过空间注意力层
         x = self.pa(x)
+
+        # 最后通过PDB模块进行进一步的特征增强
+        x = self.pdb(x)
+
         return x
 
 

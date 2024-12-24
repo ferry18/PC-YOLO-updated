@@ -2,12 +2,10 @@ import torch
 from ultralytics import YOLO
 import os
 
-# 确保将自定义的 ACConv2d 层导入
-from ultralytics.nn.modules import ACConv2d  # 你的自定义模块应该包含 ACConv2d 的定义
-
 # 定义路径
 model_path = 'D:/way/yolo/yolo11_2/ultralytics/runs/train/exp_datasets7_ACConv2d/weights/best.pt'
 data_path = 'D:/way/yolo/Datasets/datasets/cityscapes.yaml'
+
 
 # 验证函数
 def validate_model(model_path, data_path):
