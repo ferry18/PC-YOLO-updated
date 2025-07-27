@@ -158,9 +158,14 @@ class BaseDataset(Dataset):
                     Path(fn).unlink(missing_ok=True)
                     im = cv2.imread(f)  # BGR
             else:  # read image
-                im = cv2.imread(f)  # BGR
-            if im is None:
-                raise FileNotFoundError(f"Image Not Found {f}")
+                im = cv2.imread(f)  # BGR or grayscale
+
+                if im is None:
+                    raise FileNotFoundError(f"Image Not Found {f}")
+
+            # Ensure image has channel dimension (supports grayscale)
+            if im.ndim == 2:  # grayscale image, add channel dimension
+                im = np.expand_dims(im, -1)
 
             h0, w0 = im.shape[:2]  # orig hw
             if rect_mode:  # resize long side to imgsz while maintaining aspect ratio

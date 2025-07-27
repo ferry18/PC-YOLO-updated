@@ -86,7 +86,20 @@ class DetectionTrainer(BaseTrainer):
     def get_model(self, cfg=None, weights=None, verbose=True):
         """Return a YOLO detection model."""
         # tasks.py --> __init__-->parse_model()解析模型
-        model = DetectionModel(cfg, nc=self.data["nc"], verbose=verbose and RANK == -1)
+        # Use single-channel input if dataset images are grayscale (shape[-1] == 1).
+        # We infer this from the first training image.
+        sample_im_path = self.train_set[0] if hasattr(self, "train_set") else None
+        in_ch = 3
+        try:
+            import cv2, numpy as np
+            if sample_im_path is not None:
+                _im = cv2.imread(sample_im_path, cv2.IMREAD_UNCHANGED)
+                if _im is not None and _im.ndim == 2:
+                    in_ch = 1
+        except Exception:
+            pass
+
+        model = DetectionModel(cfg, ch=in_ch, nc=self.data["nc"], verbose=verbose and RANK == -1)
         if weights:
             model.load(weights)
         return model
