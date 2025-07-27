@@ -2096,8 +2096,11 @@ class Format:
             >>> print(formatted_img.shape)
             torch.Size([3, 100, 100])
         """
+        # Ensure image has channel dimension and replicate to 3 channels if grayscale
         if len(img.shape) < 3:
             img = np.expand_dims(img, -1)
+        if img.shape[2] == 1:
+            img = np.repeat(img, 3, axis=2)
         img = img.transpose(2, 0, 1)
         img = np.ascontiguousarray(img[::-1] if random.uniform(0, 1) > self.bgr else img)
         img = torch.from_numpy(img)
